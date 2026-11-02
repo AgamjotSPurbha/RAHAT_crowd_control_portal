@@ -1,0 +1,2115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAHAT - Hospital Crowd Control Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Inter & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        hospital: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035388',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, .font-display { font-family: 'Outfit', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
+
+    <!-- ================================================================= -->
+    <!-- 3-STEP ONBOARDING GATEWAY OVERLAY                                 -->
+    <!-- ================================================================= -->
+    <div id="onboardingGateway" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative overflow-hidden transition-all duration-300">
+            
+            <!-- Step Progress Indicator Dots -->
+            <div class="flex items-center justify-center gap-2 mb-6">
+                <div id="dotStep1" class="w-8 h-2.5 rounded-full bg-hospital-600 transition-all"></div>
+                <div id="dotStep2" class="w-2.5 h-2.5 rounded-full bg-slate-200 transition-all"></div>
+                <div id="dotStep3" class="w-2.5 h-2.5 rounded-full bg-slate-200 transition-all"></div>
+            </div>
+
+            <!-- STEP 1: LANGUAGE SELECTION -->
+            <div id="gatewayStep1" class="space-y-6 text-center">
+                <div class="w-16 h-16 bg-hospital-100 text-hospital-600 rounded-2xl flex items-center justify-center mx-auto text-3xl shadow-md">
+                    <i class="fa-solid fa-language"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900 font-display">Select Preferred Language</h2>
+                    <p class="text-slate-500 text-xs sm:text-sm mt-1">भाषा चुनें / भाषा निवडा</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 pt-2">
+                    <button onclick="setGatewayLanguage('en')" class="p-4 rounded-2xl border-2 border-slate-200 hover:border-hospital-600 hover:bg-hospital-50/50 transition-all text-left flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🇬🇧</span>
+                            <div>
+                                <div class="font-bold text-slate-900 group-hover:text-hospital-700 font-display">English</div>
+                                <div class="text-xs text-slate-400">Continue in English</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-hospital-600"></i>
+                    </button>
+
+                    <button onclick="setGatewayLanguage('hi')" class="p-4 rounded-2xl border-2 border-slate-200 hover:border-hospital-600 hover:bg-hospital-50/50 transition-all text-left flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🇮🇳</span>
+                            <div>
+                                <div class="font-bold text-slate-900 group-hover:text-hospital-700 font-display">हिंदी (Hindi)</div>
+                                <div class="text-xs text-slate-400">हिंदी भाषा में जारी रखें</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-hospital-600"></i>
+                    </button>
+
+                    <button onclick="setGatewayLanguage('mr')" class="p-4 rounded-2xl border-2 border-slate-200 hover:border-hospital-600 hover:bg-hospital-50/50 transition-all text-left flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🇮🇳</span>
+                            <div>
+                                <div class="font-bold text-slate-900 group-hover:text-hospital-700 font-display">मराठी (Marathi)</div>
+                                <div class="text-xs text-slate-400">मराठी भाषेत पुढे जा</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-hospital-600"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: PATHWAY / ROLE SELECTION (3 CHOICES) -->
+            <div id="gatewayStep2" class="space-y-5 hidden">
+                <div class="flex items-center justify-between">
+                    <button onclick="goToGatewayStep(1)" class="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-left"></i> <span id="backToLangText">Change Language</span>
+                    </button>
+                    <span class="text-xs bg-slate-100 font-bold px-2.5 py-1 rounded-full text-slate-600" id="currentSelectedLangBadge">English</span>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-14 h-14 bg-hospital-100 text-hospital-600 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-md mb-2">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                    </div>
+                    <h2 class="text-xl font-black text-slate-900 font-display" id="roleStepTitle">Select Entrance Portal</h2>
+                    <p class="text-slate-500 text-xs mt-0.5" id="roleStepSubtitle">Choose your access pathway to continue</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 pt-1">
+                    <!-- Option 1: Patient / Visitor -->
+                    <button onclick="selectRolePatient()" class="p-3.5 rounded-2xl border-2 border-emerald-200 bg-emerald-50/30 hover:bg-emerald-50 hover:border-emerald-500 transition-all text-left flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-lg shadow-sm shrink-0">
+                                <i class="fa-solid fa-user-injured"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-900 text-sm group-hover:text-emerald-800 font-display" id="rolePatientTitle">Patient / Visitor Portal</div>
+                                <p class="text-[11px] text-slate-500" id="rolePatientDesc">Zero login required. View live beds & book OPD passes instantly.</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-700 flex items-center gap-1 shrink-0">
+                            Enter &rarr;
+                        </span>
+                    </button>
+
+                    <!-- Option 2: Hospital Staff Login -->
+                    <button onclick="selectRoleHospital()" class="p-3.5 rounded-2xl border-2 border-slate-200 hover:border-hospital-600 hover:bg-hospital-50/50 transition-all text-left flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center text-lg shadow-sm shrink-0">
+                                <i class="fa-solid fa-hospital-user"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-900 text-sm group-hover:text-hospital-700 font-display" id="roleHospitalTitle">Hospital Staff / Admin Login</div>
+                                <p class="text-[11px] text-slate-500" id="roleHospitalDesc">Authenticate to control beds, doctor roster, and announcements.</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-hospital-700 flex items-center gap-1 shrink-0">
+                            Login &rarr;
+                        </span>
+                    </button>
+
+                    <!-- Option 3: Register Your Hospital Now -->
+                    <button onclick="selectRoleRegisterHospital()" class="p-3.5 rounded-2xl border-2 border-amber-200 bg-amber-50/30 hover:bg-amber-50 hover:border-amber-500 transition-all text-left flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-lg shadow-sm shrink-0">
+                                <i class="fa-solid fa-hospital-circle-plus"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-900 text-sm group-hover:text-amber-800 font-display" id="roleRegisterTitle">Register Your Hospital Now</div>
+                                <p class="text-[11px] text-slate-500" id="roleRegisterDesc">Onboard a new medical facility into our live crowd management network.</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-amber-700 flex items-center gap-1 shrink-0">
+                            Register &rarr;
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 3A: PATIENT FACILITY SELECTION -->
+            <div id="gatewayStep3Patient" class="space-y-4 hidden">
+                <div class="flex items-center justify-between">
+                    <button onclick="goToGatewayStep(2)" class="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-left"></i> <span id="backToRolesPatientText">Back to Options</span>
+                    </button>
+                    <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full">Zero Login Required</span>
+                </div>
+
+                <div class="text-center">
+                    <h2 class="text-xl font-bold text-slate-900 font-display" id="patientSelectHospHeader">Select Medical Facility</h2>
+                    <p class="text-xs text-slate-500 mt-0.5" id="patientSelectHospSub">Choose a hospital to view live bed counts and book OPD passes.</p>
+                </div>
+
+                <div id="patientHospitalCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[320px] overflow-y-auto custom-scrollbar p-1">
+                    <!-- Dynamically Populated Hospital Cards -->
+                </div>
+            </div>
+
+            <!-- STEP 3B: ADMIN LOGIN FORM -->
+            <div id="gatewayStep3Admin" class="space-y-4 hidden">
+                <div class="flex items-center justify-between">
+                    <button onclick="goToGatewayStep(2)" class="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-left"></i> <span id="backToRoleAdminText">Back to Options</span>
+                    </button>
+                    <span class="text-xs bg-slate-100 font-bold px-2 py-0.5 rounded-full text-slate-600" id="adminAuthBadge">Hospital Staff Login</span>
+                </div>
+
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 font-display" id="loginModalHeader">Staff Authentication Portal</h2>
+                    <p class="text-xs text-slate-500 mt-0.5" id="loginModalSub">Select target facility and enter administrator credentials.</p>
+                </div>
+
+                <form onsubmit="handleHospitalLogin(event)" class="space-y-3 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Target Hospital Facility</label>
+                        <select id="loginHospitalSelect" onchange="updateDemoCredHelper()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-600 outline-none">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Demo Credentials Helper -->
+                    <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start gap-2">
+                        <i class="fa-solid fa-key text-amber-600 mt-0.5"></i>
+                        <div>
+                            <span class="font-bold block">Facility Login Credentials:</span>
+                            <div class="font-mono text-[11px] mt-0.5" id="demoCredDetails">
+                                Username: <span class="font-bold">admin</span> &bull; Password: <span class="font-bold">hospital123</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Staff Username</label>
+                        <input type="text" id="loginUsername" required value="admin" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-600 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Password</label>
+                        <input type="password" id="loginPassword" required value="hospital123" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-600 outline-none">
+                    </div>
+
+                    <div id="loginErrorMsg" class="text-rose-600 font-semibold text-xs hidden flex items-center gap-1">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>Invalid credentials for the selected hospital.</span>
+                    </div>
+
+                    <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span>Authenticate & Enter Admin Mode</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- STEP 3C: REGISTER YOUR HOSPITAL FORM -->
+            <div id="gatewayStep3Register" class="space-y-4 hidden">
+                <div class="flex items-center justify-between">
+                    <button onclick="goToGatewayStep(2)" class="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-left"></i> <span>Back to Options</span>
+                    </button>
+                    <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">New Facility Onboarding</span>
+                </div>
+
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 font-display">Onboard New Hospital Facility</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Register your facility to join our live regional crowd management portal.</p>
+                </div>
+
+                <form onsubmit="handleRegisterHospital(event)" class="space-y-3 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Hospital Facility Full Name</label>
+                        <input type="text" id="regHospName" required placeholder="e.g. Apollo Multi-Specialty Hospital" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-600 outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Facility Code / Prefix</label>
+                            <input type="text" id="regHospPrefix" required placeholder="e.g. APL" maxlength="4" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium uppercase font-mono focus:ring-2 focus:ring-hospital-600 outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Emergency Hotline</label>
+                            <input type="text" id="regHospHotline" required placeholder="+91 (800) 555-APL" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-600 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Admin Username</label>
+                            <input type="text" id="regAdminUser" required placeholder="e.g. apollo" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-600 outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Admin Password</label>
+                            <input type="password" id="regAdminPass" required placeholder="e.g. apollo123" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-600 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600">
+                        <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>
+                        Automatically initializes 6 mandatory wards &amp; 18 initial doctors (<span class="font-mono">Doctor-1</span> to <span class="font-mono">Doctor-18</span>).
+                    </div>
+
+                    <button type="submit" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 font-display">
+                        <i class="fa-solid fa-hospital-user"></i>
+                        <span>Register &amp; Launch Hospital Dashboard</span>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- BROADCAST ANNOUNCEMENT TICKER -->
+    <div id="broadcastBanner" class="bg-amber-500 text-white px-4 py-2 text-xs sm:text-sm font-medium transition-all shadow-inner">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 overflow-hidden">
+                <span class="bg-amber-700/70 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                    <i class="fa-solid fa-bullhorn mr-1"></i> <span>Live Notice</span>
+                </span>
+                <p id="broadcastText" class="truncate font-medium">
+                    Notice: ICU capacity is currently tight. Non-emergency consultations are recommended via General OPD.
+                </p>
+            </div>
+            <button onclick="closeBroadcastBanner()" class="text-white/80 hover:text-white text-xs px-2 py-1 rounded hover:bg-white/10 shrink-0">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN HEADER NAVIGATION -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20 gap-2">
+                <!-- Branding -->
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div id="headerLogoBadge" class="w-11 h-11 bg-hospital-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-hospital-600/30 shrink-0 font-bold text-base font-display">
+                        APX
+                    </div>
+                    <div class="truncate">
+                        <h1 class="font-bold text-slate-900 text-base sm:text-lg tracking-tight leading-tight truncate font-display" id="headerHospitalTitle">
+                            Apex Regional Medical Center
+                        </h1>
+                        <p class="text-xs text-slate-500 font-medium truncate" id="headerHospitalSub">Live Crowd Control, OPD Tracker & Service Portal</p>
+                    </div>
+                </div>
+
+                <!-- Right Tools: Hospital Switcher + Language Selector + Role Badge -->
+                <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                    
+                    <!-- Header Facility Switcher -->
+                    <div class="relative hidden sm:block">
+                        <select id="headerHospitalSwitcher" onchange="switchHospitalFromHeader(this.value)" class="bg-slate-100 border border-slate-300 text-slate-800 font-bold text-xs rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-hospital-500">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Global Language Dropdown -->
+                    <div class="relative">
+                        <select id="globalLangSelect" onchange="changeLanguageFromHeader(this.value)" class="bg-slate-100 border border-slate-300 text-slate-800 font-bold text-xs rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-hospital-500">
+                            <option value="en">🇬🇧 EN</option>
+                            <option value="hi">🇮🇳 हिंदी</option>
+                            <option value="mr">🇮🇳 मराठी</option>
+                        </select>
+                    </div>
+
+                    <!-- Role Badge / Admin Logout Container -->
+                    <div id="userRoleBadgeContainer" class="flex items-center gap-2"></div>
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MOBILE FACILITY SWITCHER -->
+    <div class="sm:hidden bg-slate-200/80 border-b border-slate-300 px-4 py-2 flex items-center justify-between text-xs font-semibold">
+        <span class="text-slate-700"><i class="fa-solid fa-hospital text-hospital-600 mr-1"></i> Facility:</span>
+        <select id="mobileHospitalSwitcher" onchange="switchHospitalFromHeader(this.value)" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800">
+            <!-- Populated dynamically -->
+        </select>
+    </div>
+
+    <!-- MAIN BODY CONTENT -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+        <!-- ================================================================= -->
+        <!-- PUBLIC VISITOR VIEW                                               -->
+        <!-- ================================================================= -->
+        <div id="publicView" class="space-y-8">
+            
+            <!-- Quick Metrics Header Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-bed text-lg"></i>
+                    </div>
+                    <div>
+                        <div id="statOpenBeds" class="text-xl font-black text-slate-900 font-display">48 Beds</div>
+                        <div class="text-xs text-slate-500 font-medium" id="statLabelBeds">Available Beds</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-user-doctor text-lg"></i>
+                    </div>
+                    <div>
+                        <div id="statActiveDocs" class="text-xl font-black text-slate-900 font-display">14 / 22 Available</div>
+                        <div class="text-xs text-slate-500 font-medium" id="statLabelDocs">Active Doctors</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-clock text-lg"></i>
+                    </div>
+                    <div>
+                        <div id="statAvgWait" class="text-xl font-black text-slate-900 font-display">18 mins</div>
+                        <div class="text-xs text-slate-500 font-medium" id="statLabelWait">Avg OPD Wait</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    </div>
+                    <div>
+                        <div id="statAlertWards" class="text-xl font-black text-slate-900 font-display">1 Ward</div>
+                        <div class="text-xs text-slate-500 font-medium" id="statLabelSurge">At High Capacity</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 1: 6 MANDATORY WARDS MATRIX -->
+            <section class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2 font-display" id="secWardsTitle">
+                            <i class="fa-solid fa-hospital-bay text-hospital-600"></i>
+                            Hospital Wards Availability
+                        </h2>
+                        <p class="text-xs text-slate-500" id="secWardsSub">Live bed occupancy, estimated admission wait time, and capacity flags.</p>
+                    </div>
+                    <div class="text-xs text-slate-500 flex items-center gap-3">
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> <span>Normal (&lt;75%)</span></span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> <span>High (75-89%)</span></span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> <span>Critical (&ge;90%)</span></span>
+                    </div>
+                </div>
+
+                <!-- 6 Ward Grid -->
+                <div id="wardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Dynamic Ward Cards -->
+                </div>
+            </section>
+
+            <!-- SECTION 2: DOCTOR ROSTER & LIVE OPD QUEUE TRACKER -->
+            <section class="space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2 font-display" id="secDocsTitle">
+                            <i class="fa-solid fa-stethoscope text-hospital-600"></i>
+                            Doctor Availability &amp; Live OPD Queue Tracker
+                        </h2>
+                        <p class="text-xs text-slate-500" id="secDocsSub">Check doctor duty status, ongoing token numbers, and consultation wait times.</p>
+                    </div>
+
+                    <!-- Filter Tools -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="relative min-w-[180px]">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="doctorSearch" onkeyup="filterDoctors()" placeholder="Search Doctor-1, Doctor-2..." class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-hospital-500 outline-none">
+                        </div>
+                        <select id="doctorDeptFilter" onchange="filterDoctors()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-700 focus:ring-2 focus:ring-hospital-500 outline-none">
+                            <option value="All">All Wards / Specialties</option>
+                        </select>
+                        <select id="doctorStatusFilter" onchange="filterDoctors()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-700 focus:ring-2 focus:ring-hospital-500 outline-none">
+                            <option value="All">All Statuses</option>
+                            <option value="Available">Available</option>
+                            <option value="In Consultation">In Consultation</option>
+                            <option value="In Surgery">In Surgery</option>
+                            <option value="On Break">On Break</option>
+                            <option value="Off Duty">Off Duty</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Doctors Card Grid -->
+                <div id="doctorsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Dynamic Doctor Cards -->
+                </div>
+            </section>
+
+            <!-- SECTION 3: PROTOCOLS & ZERO-FRICTION OPD PASS GENERATOR -->
+            <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Protocols (7 Cols) -->
+                <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2 font-display">
+                            <i class="fa-solid fa-clipboard-list text-hospital-600"></i>
+                            Hospital Visit Guidance &amp; Protocols
+                        </h3>
+                        <p class="text-xs text-slate-500">Operational guidelines to keep queues orderly and minimize wait times.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Peak OPD Hours</div>
+                            <div class="text-sm font-bold text-slate-800">09:00 AM – 01:00 PM</div>
+                            <p class="text-xs text-slate-500 mt-1">High queue congestion expected. Off-peak visits recommended after 02:30 PM.</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Visitor Pass Quota</div>
+                            <div class="text-sm font-bold text-slate-800">Max 1 Attendant per Patient</div>
+                            <p class="text-xs text-slate-500 mt-1">General ward allows max 2 visitors during evening hours (04:00 PM - 06:00 PM).</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="text-xs font-bold text-slate-700 uppercase tracking-wider">Ward Safety Requirements</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                            <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-900">
+                                <span class="font-bold block">Isolation Ward</span>
+                                <span>N95 Mask mandatory. Zero casual visitors.</span>
+                            </div>
+                            <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900">
+                                <span class="font-bold block">ICU Unit</span>
+                                <span>1 immediate family member with sanitizer.</span>
+                            </div>
+                            <div class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900">
+                                <span class="font-bold block">Pediatric Ward</span>
+                                <span>Parents allowed 24/7. Symptom check at door.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OPD Queue Pass Form (5 Cols) -->
+                <div class="lg:col-span-5 bg-gradient-to-br from-hospital-900 to-slate-900 text-white rounded-2xl p-6 shadow-md flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-lg font-bold flex items-center gap-2 font-display" id="passGenTitle">
+                                <i class="fa-solid fa-ticket text-amber-400"></i>
+                                Digital OPD Queue Pass
+                            </h3>
+                            <span class="bg-amber-400/20 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-400/30" id="noLoginTag">No Login Required</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-4" id="passGenSub">
+                            Generate a virtual token pass to avoid waiting room overcrowding.
+                        </p>
+
+                        <form id="passForm" onsubmit="generateQueuePass(event)" class="space-y-3 text-xs">
+                            <div>
+                                <label class="block text-slate-300 font-medium mb-1" id="lblPatientName">Patient Full Name</label>
+                                <input type="text" id="passPatientName" required placeholder="e.g. Rahul Sharma" class="w-full px-3 py-2 bg-slate-800/80 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-400 placeholder:text-slate-500">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-slate-300 font-medium mb-1" id="lblTargetWard">Ward / Specialty</label>
+                                    <select id="passWardSelect" onchange="updatePassDoctorOptions()" class="w-full px-3 py-2 bg-slate-800/80 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                        <!-- Dynamically populated -->
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 font-medium mb-1" id="lblDoctor">Consulting Doctor</label>
+                                    <select id="passDoctorSelect" class="w-full px-3 py-2 bg-slate-800/80 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                        <!-- Dynamically populated -->
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-slate-300 font-medium mb-1" id="lblMobile">Mobile Number (SMS Notification)</label>
+                                <input type="tel" id="passPhone" required placeholder="+91 98765 43210" class="w-full px-3 py-2 bg-slate-800/80 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-400 placeholder:text-slate-500">
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl transition-all shadow-md shadow-amber-500/20 text-sm mt-2 flex items-center justify-center gap-2 font-display">
+                                <i class="fa-solid fa-qrcode"></i>
+                                <span id="btnGeneratePass">Get Instant Digital Pass</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: SMART REDIRECT & NEARBY HOSPITALS -->
+            <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2 font-display" id="nearbyTitle">
+                                <i class="fa-solid fa-route text-hospital-600"></i>
+                                Smart Redirect &amp; Nearby Hospital Suggestions
+                            </h2>
+                            <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Crowd Balancing Active</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5" id="nearbySub">When main hospital capacity is full, partner facilities are suggested with real-time bed counts.</p>
+                    </div>
+
+                    <div id="capacityWarningTrigger" class="hidden items-center gap-2 bg-rose-50 border border-rose-200 text-rose-800 px-3 py-1.5 rounded-xl text-xs font-semibold">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+                        <span>Surge Active – Alternative Transfer Suggested</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="nearbyHospitalsGrid">
+                    <!-- Dynamic Cards -->
+                </div>
+            </section>
+
+        </div>
+
+
+        <!-- ================================================================= -->
+        <!-- HOSPITAL ADMIN CONTROL PANEL                                      -->
+        <!-- ================================================================= -->
+        <div id="adminView" class="hidden space-y-8">
+            
+            <!-- Admin Top Banner -->
+            <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                            Authenticated Control Mode
+                        </span>
+                        <h2 class="text-xl font-bold font-display">Hospital Command &amp; Bed Control Suite</h2>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Real-time bed allocation adjustments, doctor token queue progression, and visitor broadcast alerts.</p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="openAddDoctorModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all shadow-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Add New Doctor</span>
+                    </button>
+                    <button onclick="resetAllData()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-semibold transition-all">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Reset Baseline
+                    </button>
+                    <button onclick="showToast(getTranslation('toastSavedTitle'), getTranslation('toastSavedMsg'), 'success')" class="px-4 py-2 bg-hospital-600 hover:bg-hospital-500 text-white font-semibold rounded-xl text-xs transition-all shadow-sm">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> Sync Live Portal
+                    </button>
+                </div>
+            </div>
+
+            <!-- ADMIN WIDGET 1: BROADCAST TICKER PUBLISHER -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 font-display">
+                    <i class="fa-solid fa-bullhorn text-hospital-600"></i>
+                    Public Banner Ticker Announcement
+                </h3>
+                
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="adminBroadcastInput" placeholder="Type announcement text for public website visitors..." class="flex-1 px-4 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-hospital-500 outline-none">
+                    <button onclick="updateBroadcastText()" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-sm transition-all shrink-0 font-display">
+                        Publish Live Banner
+                    </button>
+                </div>
+            </div>
+
+            <!-- ADMIN WIDGET 2: WARD BED COUNTERS (+ / - CONTROLS) -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 font-display">
+                            <i class="fa-solid fa-bed text-hospital-600"></i>
+                            Bed Occupancy Control (6 Specific Wards)
+                        </h3>
+                        <p class="text-xs text-slate-500">Use +/- buttons to increment or decrement bed occupancy in real time.</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold border-y border-slate-200">
+                            <tr>
+                                <th class="py-3 px-4">Ward Name</th>
+                                <th class="py-3 px-4">Total Beds</th>
+                                <th class="py-3 px-4">Occupied</th>
+                                <th class="py-3 px-4">Available</th>
+                                <th class="py-3 px-4">Occupancy %</th>
+                                <th class="py-3 px-4 text-center">Live Controls</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminWardsTable" class="divide-y divide-slate-100 font-medium text-slate-800">
+                            <!-- Dynamic Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ADMIN WIDGET 3: DOCTOR ROSTER COMMAND (WITH REMOVE DOCTOR) -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 font-display">
+                            <i class="fa-solid fa-user-doctor text-hospital-600"></i>
+                            Doctor Roster, Duty Status &amp; OPD Token Advance
+                        </h3>
+                        <p class="text-xs text-slate-500">Manage doctor statuses, advance token numbers, or remove doctors from service.</p>
+                    </div>
+
+                    <button onclick="openAddDoctorModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all shadow-xs flex items-center gap-1.5 shrink-0">
+                        <i class="fa-solid fa-plus"></i> Add Doctor
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold border-y border-slate-200">
+                            <tr>
+                                <th class="py-3 px-4">Doctor Name</th>
+                                <th class="py-3 px-4">Ward / Specialty</th>
+                                <th class="py-3 px-4">Room</th>
+                                <th class="py-3 px-4">Duty Status</th>
+                                <th class="py-3 px-4">Serving Token</th>
+                                <th class="py-3 px-4">Queue Size</th>
+                                <th class="py-3 px-4 text-center">Token &amp; Removal Controls</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminDoctorsTable" class="divide-y divide-slate-100 font-medium text-slate-800">
+                            <!-- Dynamic Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between sm:text-left">
+            <p>&copy; 2026 <span id="footerHospitalName" class="font-bold text-slate-700">Apex Regional Medical Center</span>. Live Crowd Management & Service Portal.</p>
+            <p class="mt-2 sm:mt-0 font-medium text-slate-400">Emergency Line: <span id="footerEmergencyHotline" class="font-bold text-slate-700">+91 (800) 555-APEX</span> | 24x7 Active Triage</p>
+        </div>
+    </footer>
+
+
+    <!-- MODAL: ADD NEW DOCTOR -->
+    <div id="addDoctorModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base font-display">Register New Doctor</h3>
+                        <p class="text-xs text-slate-500">Add specialist to active hospital roster</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('addDoctorModal')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleAddDoctorSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Doctor Name / Designation</label>
+                    <input type="text" id="newDocName" required placeholder="e.g. Doctor-23" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Ward / Department</label>
+                        <select id="newDocDept" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-500 outline-none">
+                            <option value="wardGen">General Ward</option>
+                            <option value="wardIcu">ICU</option>
+                            <option value="wardMat">Maternity Ward</option>
+                            <option value="wardPed">Pediatric Ward</option>
+                            <option value="wardOrt">Orthopedic Ward</option>
+                            <option value="wardIso">Isolation Ward</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">OPD Room Number</label>
+                        <input type="text" id="newDocRoom" required placeholder="e.g. OPD Room 108" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Duty Status</label>
+                        <select id="newDocStatus" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-500 outline-none">
+                            <option value="Available">Available</option>
+                            <option value="In Consultation">In Consultation</option>
+                            <option value="On Break">On Break</option>
+                            <option value="In Surgery">In Surgery</option>
+                            <option value="Off Duty">Off Duty</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Starting Token Number</label>
+                        <input type="number" id="newDocToken" required value="1" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-hospital-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-3 flex gap-2">
+                    <button type="button" onclick="closeModal('addDoctorModal')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all shadow-sm font-display">
+                        Save Doctor
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DIGITAL QUEUE PASS RESULT -->
+    <div id="tokenModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-5">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base font-display">Digital Queue Pass Issued</h3>
+                        <p class="text-xs text-slate-500">Show this pass at room entrance</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('tokenModal')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Ticket Card -->
+            <div id="passTicketContent" class="bg-slate-900 text-white rounded-2xl p-5 space-y-4 relative overflow-hidden">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-hospital-600/20 rounded-full blur-xl"></div>
+                
+                <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+                    <div>
+                        <div class="text-[10px] text-slate-400 uppercase font-bold" id="ticketHospName">Apex Regional Medical Center</div>
+                        <div id="ticketDept" class="text-xs font-bold text-amber-400">General Ward</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">Token Number</div>
+                        <div id="ticketTokenNum" class="text-2xl font-black text-white tracking-wider font-display">APX-104</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">Patient Name</span>
+                        <span id="ticketPatient" class="font-semibold text-slate-200">Rahul Sharma</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">Doctor</span>
+                        <span id="ticketDoctor" class="font-semibold text-slate-200">Doctor-1</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">Est. Time</span>
+                        <span id="ticketEstTime" class="font-semibold text-emerald-400">11:15 AM</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">OPD Room</span>
+                        <span id="ticketRoom" class="font-semibold text-slate-200">OPD Room 102</span>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                    <span><i class="fa-solid fa-mobile-screen mr-1"></i> SMS sent to <span id="ticketPhone">phone</span></span>
+                    <i class="fa-solid fa-qrcode text-2xl text-slate-200"></i>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="copyTokenDetails()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 font-display">
+                    <i class="fa-solid fa-copy"></i> Copy Ticket Details
+                </button>
+                <button onclick="closeModal('tokenModal')" class="flex-1 py-2.5 bg-hospital-600 hover:bg-hospital-700 text-white font-semibold rounded-xl text-xs transition-all font-display">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NEARBY HOSPITAL DIRECTIONS -->
+    <div id="hospitalModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                <div>
+                    <h3 id="modalHospName" class="font-bold text-slate-900 text-base font-display">Sanjivani Multi-Specialty Hospital</h3>
+                    <p id="modalHospDist" class="text-xs text-slate-500">1.8 km away &bull; Approx 6 mins drive</p>
+                </div>
+                <button onclick="closeModal('hospitalModal')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 grid grid-cols-2 gap-2">
+                    <div>
+                        <span class="text-slate-500 block text-[10px] uppercase font-bold">Estimated ICU Beds</span>
+                        <span id="modalHospIcu" class="font-bold text-emerald-600 text-sm">1 Free Bed</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block text-[10px] uppercase font-bold">General Ward Status</span>
+                        <span id="modalHospGen" class="font-bold text-emerald-600 text-sm">6 Free Beds</span>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl space-y-1">
+                    <div class="font-bold text-blue-900">Transfer &amp; Visit Guidance:</div>
+                    <p class="text-blue-800">
+                        This partner facility is currently operating with active emergency triage. Ambulance dispatch or direct walk-in OPD registration is active.
+                    </p>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-slate-700 font-bold">Direct Hotline:</label>
+                    <div class="flex items-center gap-2">
+                        <input type="text" readonly id="modalHospPhone" value="+91 (800) 555-SANJ" class="flex-1 px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-xl font-mono text-xs">
+                        <button onclick="showToast('Calling Hotline...', 'Dialing partner medical center', 'info')" class="px-3 py-1.5 bg-emerald-600 text-white rounded-xl font-bold">
+                            <i class="fa-solid fa-phone mr-1"></i> Call
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+                <button onclick="closeModal('hospitalModal')" class="px-4 py-2 bg-slate-800 text-white font-semibold rounded-xl text-xs font-display">
+                    Close Guide
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+
+    <!-- ================================================================= -->
+    <!-- APPLICATION LOGIC & MULTI-HOSPITAL DATA MODEL                     -->
+    <!-- ================================================================= -->
+    <script>
+        // HELPER TO GENERATE INITIAL DOCTOR ROSTERS WITH EXACT TARGET STATUS DISTRIBUTIONS
+        function generateDoctorsWithDistribution(totalCount, availableCount, inSurgeryCount, onBreakCount, offDutyCount, roomOffset = 100) {
+            const depts = ['wardGen', 'wardIcu', 'wardMat', 'wardPed', 'wardOrt', 'wardIso'];
+            const doctors = [];
+
+            // Build status array matching exact requested counts
+            let statuses = [];
+            for (let i = 0; i < inSurgeryCount; i++) statuses.push('In Surgery');
+            for (let i = 0; i < onBreakCount; i++) statuses.push('On Break');
+            for (let i = 0; i < offDutyCount; i++) statuses.push('Off Duty');
+            
+            // The remainder are split between 'Available' and 'In Consultation' (both count towards active capacity)
+            const activeRemaining = availableCount;
+            const inConsultCount = Math.floor(activeRemaining * 0.3);
+            const pureAvailCount = activeRemaining - inConsultCount;
+
+            for (let i = 0; i < pureAvailCount; i++) statuses.push('Available');
+            for (let i = 0; i < inConsultCount; i++) statuses.push('In Consultation');
+
+            // Shuffle deterministically for clean initial UI distribution
+            for (let i = 1; i <= totalCount; i++) {
+                const deptKey = depts[(i - 1) % depts.length];
+                const status = statuses[i - 1] || 'Available';
+
+                doctors.push({
+                    id: i,
+                    name: `Doctor-${i}`,
+                    deptKey: deptKey,
+                    status: status,
+                    currentToken: Math.floor(4 + (i * 1.2)),
+                    totalWaiting: Math.floor(1 + (i % 6)),
+                    room: `OPD Room ${roomOffset + i}`
+                });
+            }
+            return doctors;
+        }
+
+        // ISOLATED MULTI-HOSPITAL DATABASE WITH UNIQUE BEDS & DOCTOR STATS
+        const hospitalsData = {
+            apex: {
+                id: 'apex',
+                prefix: 'APX',
+                username: 'admin',
+                password: 'hospital123',
+                emergency: '+91 (800) 555-APEX',
+                name: {
+                    en: "Apex Regional Medical Center",
+                    hi: "एपेक्स रीजनल मेडिकल सेंटर",
+                    mr: "ॲपेक्स प्रादेशिक वैद्यकीय केंद्र"
+                },
+                sub: {
+                    en: "Live Crowd Control, OPD Tracker & Service Portal",
+                    hi: "लाइव भीड़ प्रबंधन, ओपीडी ट्रैकर एवं सेवा पोर्टल",
+                    mr: "थेट गर्दी नियंत्रण, ओपीडी ट्रॅकर आणि सेवा पोर्टल"
+                },
+                broadcastNotice: "Notice: ICU capacity is currently tight. Non-emergency consultations are recommended via General OPD.",
+                // APEX: 320 Total Beds (272 Occupied, 48 Available)
+                wards: [
+                    { id: 'gen', nameKey: 'wardGen', total: 120, occupied: 102, waitMins: 25, icon: 'fa-bed-pulse' },
+                    { id: 'icu', nameKey: 'wardIcu', total: 30, occupied: 27, waitMins: 5, icon: 'fa-heart-pulse' },
+                    { id: 'mat', nameKey: 'wardMat', total: 45, occupied: 38, waitMins: 15, icon: 'fa-baby' },
+                    { id: 'ped', nameKey: 'wardPed', total: 50, occupied: 42, waitMins: 20, icon: 'fa-child-reaching' },
+                    { id: 'ort', nameKey: 'wardOrt', total: 45, occupied: 39, waitMins: 10, icon: 'fa-bone' },
+                    { id: 'iso', nameKey: 'wardIso', total: 30, occupied: 24, waitMins: 30, icon: 'fa-mask-face' }
+                ],
+                // APEX: 22 Total Doctors (14 Available, 3 In Surgery, 3 On Break, 2 Off Duty)
+                doctors: generateDoctorsWithDistribution(22, 14, 3, 3, 2, 100),
+                nearbyHospitals: [
+                    { id: 'h1', name: 'Sanjivani Multi-Specialty Hospital', distance: '1.8 km', time: '6 mins driving', icuAvail: '1 bed free', genAvail: '6 beds free', phone: '+91 (800) 555-SANJ' },
+                    { id: 'h2', name: 'St. Jude General Hospital', distance: '3.4 km', time: '11 mins driving', icuAvail: '12 beds free', genAvail: '40 beds free', phone: '+91 (800) 555-JUDE' },
+                    { id: 'h3', name: 'City Care Super Specialty Hospital', distance: '5.2 km', time: '15 mins driving', icuAvail: '1 bed free', genAvail: '2 beds free', phone: '+91 (800) 555-CITY' }
+                ]
+            },
+            sanjivani: {
+                id: 'sanjivani',
+                prefix: 'SNJ',
+                username: 'sanjivani',
+                password: 'sanjivani123',
+                emergency: '+91 (800) 555-SANJ',
+                name: {
+                    en: "Sanjivani Multi-Specialty Hospital",
+                    hi: "संजीवनी मल्टीस्पेशलिटी अस्पताल",
+                    mr: "संजीवनी मल्टीस्पेशालिटी रुग्णालय"
+                },
+                sub: {
+                    en: "Community Healthcare & Emergency Care Portal",
+                    hi: "सामुदायिक स्वास्थ्य सेवा एवं आपातकालीन केंद्र",
+                    mr: "सामुदायिक आरोग्य सेवा आणि आपत्कालीन केंद्र"
+                },
+                broadcastNotice: "High patient surge at Sanjivani. Digital OPD queue pass holders get priority routing.",
+                // SANJIVANI: 190 Total Beds (176 Occupied, 14 Available - High Surge)
+                wards: [
+                    { id: 'gen', nameKey: 'wardGen', total: 80, occupied: 74, waitMins: 35, icon: 'fa-bed-pulse' },
+                    { id: 'icu', nameKey: 'wardIcu', total: 20, occupied: 19, waitMins: 10, icon: 'fa-heart-pulse' },
+                    { id: 'mat', nameKey: 'wardMat', total: 25, occupied: 23, waitMins: 20, icon: 'fa-baby' },
+                    { id: 'ped', nameKey: 'wardPed', total: 30, occupied: 28, waitMins: 25, icon: 'fa-child-reaching' },
+                    { id: 'ort', nameKey: 'wardOrt', total: 20, occupied: 18, waitMins: 15, icon: 'fa-bone' },
+                    { id: 'iso', nameKey: 'wardIso', total: 15, occupied: 14, waitMins: 40, icon: 'fa-mask-face' }
+                ],
+                // SANJIVANI: 16 Total Doctors (8 Available, 4 In Surgery, 2 On Break, 2 Off Duty)
+                doctors: generateDoctorsWithDistribution(16, 8, 4, 2, 2, 200),
+                nearbyHospitals: [
+                    { id: 'h1', name: 'Apex Regional Medical Center', distance: '1.8 km', time: '6 mins driving', icuAvail: '3 beds free', genAvail: '18 beds free', phone: '+91 (800) 555-APEX' },
+                    { id: 'h2', name: 'St. Jude General Hospital', distance: '2.9 km', time: '9 mins driving', icuAvail: '12 beds free', genAvail: '40 beds free', phone: '+91 (800) 555-JUDE' },
+                    { id: 'h3', name: 'City Care Super Specialty Hospital', distance: '4.8 km', time: '14 mins driving', icuAvail: '1 bed free', genAvail: '2 beds free', phone: '+91 (800) 555-CITY' }
+                ]
+            },
+            stjude: {
+                id: 'stjude',
+                prefix: 'STJ',
+                username: 'stjude',
+                password: 'stjude123',
+                emergency: '+91 (800) 555-JUDE',
+                name: {
+                    en: "St. Jude General Hospital",
+                    hi: "सेंट जुड जनरल अस्पताल",
+                    mr: "सेंट ज्यूड जनरल रुग्णालय"
+                },
+                sub: {
+                    en: "Trauma & Emergency Care Control Portal",
+                    hi: "ट्रॉमा एवं आपातकालीन देखभाल नियंत्रण पोर्टल",
+                    mr: "ट्रॉमा आणि आपत्कालीन काळजी नियंत्रण पोर्टल"
+                },
+                broadcastNotice: "Bed availability normal across General and ICU wards. Direct walk-in active.",
+                // ST JUDE: 450 Total Beds (358 Occupied, 92 Available - Low Surge / High Capacity)
+                wards: [
+                    { id: 'gen', nameKey: 'wardGen', total: 180, occupied: 140, waitMins: 10, icon: 'fa-bed-pulse' },
+                    { id: 'icu', nameKey: 'wardIcu', total: 50, occupied: 38, waitMins: 2, icon: 'fa-heart-pulse' },
+                    { id: 'mat', nameKey: 'wardMat', total: 60, occupied: 46, waitMins: 10, icon: 'fa-baby' },
+                    { id: 'ped', nameKey: 'wardPed', total: 70, occupied: 55, waitMins: 12, icon: 'fa-child-reaching' },
+                    { id: 'ort', nameKey: 'wardOrt', total: 50, occupied: 42, waitMins: 8, icon: 'fa-bone' },
+                    { id: 'iso', nameKey: 'wardIso', total: 40, occupied: 37, waitMins: 15, icon: 'fa-mask-face' }
+                ],
+                // ST JUDE: 28 Total Doctors (21 Available, 2 In Surgery, 3 On Break, 2 Off Duty)
+                doctors: generateDoctorsWithDistribution(28, 21, 2, 3, 2, 300),
+                nearbyHospitals: [
+                    { id: 'h1', name: 'Sanjivani Multi-Specialty Hospital', distance: '2.9 km', time: '9 mins driving', icuAvail: '1 bed free', genAvail: '6 beds free', phone: '+91 (800) 555-SANJ' },
+                    { id: 'h2', name: 'Apex Regional Medical Center', distance: '3.4 km', time: '11 mins driving', icuAvail: '3 beds free', genAvail: '18 beds free', phone: '+91 (800) 555-APEX' },
+                    { id: 'h3', name: 'City Care Super Specialty Hospital', distance: '3.9 km', time: '12 mins driving', icuAvail: '1 bed free', genAvail: '2 beds free', phone: '+91 (800) 555-CITY' }
+                ]
+            },
+            citycare: {
+                id: 'citycare',
+                prefix: 'CC',
+                username: 'citycare',
+                password: 'citycare123',
+                emergency: '+91 (800) 555-CITY',
+                name: {
+                    en: "City Care Super Specialty Hospital",
+                    hi: "सिटी केयर सुपर स्पेशलिटी अस्पताल",
+                    mr: "सिटी केअर सुपर स्पेशालिटी रुग्णालय"
+                },
+                sub: {
+                    en: "Advanced Medical OPD & Emergency Response Hub",
+                    hi: "उन्नत चिकित्सा ओपीडी और आपातकालीन प्रतिक्रिया केंद्र",
+                    mr: "प्रगत वैद्यकीय ओपीडी आणि आपत्कालीन प्रतिसाद केंद्र"
+                },
+                broadcastNotice: "CRITICAL SURGE NOTICE: Ward capacity near 96%. Non-critical transfers directed to St. Jude.",
+                // CITY CARE: 140 Total Beds (134 Occupied, 6 Available - Critical Surge)
+                wards: [
+                    { id: 'gen', nameKey: 'wardGen', total: 50, occupied: 48, waitMins: 45, icon: 'fa-bed-pulse' },
+                    { id: 'icu', nameKey: 'wardIcu', total: 20, occupied: 19, waitMins: 20, icon: 'fa-heart-pulse' },
+                    { id: 'mat', nameKey: 'wardMat', total: 20, occupied: 19, waitMins: 25, icon: 'fa-baby' },
+                    { id: 'ped', nameKey: 'wardPed', total: 20, occupied: 19, waitMins: 30, icon: 'fa-child-reaching' },
+                    { id: 'ort', nameKey: 'wardOrt', total: 15, occupied: 14, waitMins: 20, icon: 'fa-bone' },
+                    { id: 'iso', nameKey: 'wardIso', total: 15, occupied: 15, waitMins: 60, icon: 'fa-mask-face' }
+                ],
+                // CITY CARE: 12 Total Doctors (5 Available, 3 In Surgery, 2 On Break, 2 Off Duty)
+                doctors: generateDoctorsWithDistribution(12, 5, 3, 2, 2, 400),
+                nearbyHospitals: [
+                    { id: 'h1', name: 'Apex Regional Medical Center', distance: '5.2 km', time: '15 mins driving', icuAvail: '3 beds free', genAvail: '18 beds free', phone: '+91 (800) 555-APEX' },
+                    { id: 'h2', name: 'Sanjivani Multi-Specialty Hospital', distance: '4.8 km', time: '14 mins driving', icuAvail: '1 bed free', genAvail: '6 beds free', phone: '+91 (800) 555-SANJ' },
+                    { id: 'h3', name: 'St. Jude General Hospital', distance: '3.9 km', time: '12 mins driving', icuAvail: '12 beds free', genAvail: '40 beds free', phone: '+91 (800) 555-JUDE' }
+                ]
+            }
+        };
+
+        // GLOBAL APPLICATION STATE
+        let state = {
+            currentLang: 'en',
+            currentHospitalKey: 'apex',
+            currentUserRole: 'patient',
+            isAdminLoggedIn: false,
+            activeView: 'public'
+        };
+
+        // TRILINGUAL DICTIONARY
+        const i18n = {
+            en: {
+                wardGen: "General Ward",
+                wardIcu: "ICU (Intensive Care Unit)",
+                wardMat: "Maternity Ward",
+                wardPed: "Pediatric Ward",
+                wardOrt: "Orthopedic Ward",
+                wardIso: "Isolation Ward",
+                statBeds: "Available Beds",
+                statDocs: "Active Doctors",
+                statWait: "Avg OPD Wait",
+                statSurge: "At High Capacity",
+                secWards: "Hospital Wards Availability",
+                secWardsSub: "Live bed occupancy, estimated admission wait time, and capacity flags.",
+                secDocs: "Doctor Availability & Live OPD Queue Tracker",
+                secDocsSub: "Check doctor duty status, ongoing token numbers, and consultation wait times.",
+                passGenTitle: "Digital OPD Queue Pass",
+                noLoginTag: "No Login Required",
+                passGenSub: "Generate a virtual token pass to avoid waiting room overcrowding.",
+                lblPatientName: "Patient Full Name",
+                lblTargetWard: "Ward / Specialty",
+                lblDoctor: "Consulting Doctor",
+                lblMobile: "Mobile Number (SMS Notification)",
+                btnGeneratePass: "Get Instant Digital Pass",
+                nearbyTitle: "Smart Redirect & Nearby Hospital Suggestions",
+                nearbySub: "When main hospital capacity is full, partner facilities are suggested with real-time bed counts.",
+                toastSavedTitle: "Portal Synced",
+                toastSavedMsg: "Admin updates are live on visitor screens.",
+                loginSuccessMsg: "Successfully authenticated as Hospital Admin."
+            },
+            hi: {
+                wardGen: "सामान्य वार्ड (General Ward)",
+                wardIcu: "गहन चिकित्सा इकाई (ICU)",
+                wardMat: "मातृत्व वार्ड (Maternity Ward)",
+                wardPed: "बाल चिकित्सा वार्ड (Pediatric Ward)",
+                wardOrt: "अस्थि रोग वार्ड (Orthopedic Ward)",
+                wardIso: "आइसोलेशन वार्ड (Isolation Ward)",
+                statBeds: "उपलब्ध बिस्तर",
+                statDocs: "सक्रिय डॉक्टर",
+                statWait: "औसत प्रतीक्षा समय",
+                statSurge: "उच्च क्षमता पर वार्ड",
+                secWards: "अस्पताल वार्ड उपलब्धता",
+                secWardsSub: "लाइव बिस्तर स्थिति, अनुमानित प्रतीक्षा समय और क्षमता अलर्ट।",
+                secDocs: "डॉक्टर उपलब्धता एवं लाइव ओपीडी कतार",
+                secDocsSub: "डॉक्टर की स्थिति, वर्तमान टोकन और परामर्श समय देखें।",
+                passGenTitle: "डिजिटल ओपीडी पास",
+                noLoginTag: "लॉगिन की आवश्यकता नहीं",
+                passGenSub: "प्रतीक्षा कक्ष की भीड़ से बचने के लिए तुरंत डिजिटल टोकन प्राप्त करें।",
+                lblPatientName: "मरीज़ का पूरा नाम",
+                lblTargetWard: "वार्ड / विभाग",
+                lblDoctor: "डॉक्टर चुनें",
+                lblMobile: "मोबाइल नंबर (एसएमएस अलर्ट)",
+                btnGeneratePass: "डिजिटल पास प्राप्त करें",
+                nearbyTitle: "निकटतम अस्पताल सुझाव एवं रीडायरेक्ट",
+                nearbySub: "मुख्य अस्पताल में भीड़ अधिक होने पर निकटतम सहयोगी अस्पतालों की उपलब्धता देखें।",
+                toastSavedTitle: "पोर्टल अपडेट हुआ",
+                toastSavedMsg: "एडमिन के बदलाव लाइव पोर्टल पर लागू कर दिए गए हैं।",
+                loginSuccessMsg: "अस्पताल प्रशासन के रूप में सफलतापूर्वक लॉगिन किया गया।"
+            },
+            mr: {
+                wardGen: "सामान्य वॉर्ड (General Ward)",
+                wardIcu: "अति दक्षता विभाग (ICU)",
+                wardMat: "प्रसूती वॉर्ड (Maternity Ward)",
+                wardPed: "बालरोग वॉर्ड (Pediatric Ward)",
+                wardOrt: "अस्थिरोग वॉर्ड (Orthopedic Ward)",
+                wardIso: "विलगीकरण वॉर्ड (Isolation Ward)",
+                statBeds: "उपलब्ध खाटा",
+                statDocs: "सक्रिय डॉक्टर",
+                statWait: "सरासरी प्रतीक्षा वेळ",
+                statSurge: "जास्त गर्दी असलेले वॉर्ड",
+                secWards: "रुग्णालय वॉर्ड खाटांची उपलब्धता",
+                secWardsSub: "खाटांची थेट संख्या, अंदाजे प्रतीक्षा वेळ आणि वॉर्ड स्थिती.",
+                secDocs: "डॉक्टर उपलब्धता आणि थेट ओपीडी रांग",
+                secDocsSub: "डॉक्टरांची स्थिती, सुरू असलेला टोकन क्रमांक आणि वेळ तपासा.",
+                passGenTitle: "डिजिटल ओपीडी पास",
+                noLoginTag: "लॉगिनची गरज नाही",
+                passGenSub: "गर्दी टाळण्यासाठी त्वरित डिजिटल टोकन पास मिळवा.",
+                lblPatientName: "रुग्णाचे पूर्ण नाव",
+                lblTargetWard: "वॉर्ड / विभाग",
+                lblDoctor: "डॉक्टर निवडा",
+                lblMobile: "मोबाईल नंबर (एसएमएस अलर्ट)",
+                btnGeneratePass: "डिजिटल पास मिळवा",
+                nearbyTitle: "जवळची पर्यायी रुग्णालये",
+                nearbySub: "रुग्णालयात जास्त गर्दी असल्यास जवळच्या इतर रुग्णालयांची थेट माहिती.",
+                toastSavedTitle: "पोर्टल अपडेट झाले",
+                toastSavedMsg: "एडमिन बदल थेट पोर्टलवर लागू केले आहेत.",
+                loginSuccessMsg: "रुग्णालय प्रशासक म्हणून यशस्वीरित्या लॉगिन झाले."
+            }
+        };
+
+        function getActiveHospitalData() {
+            return hospitalsData[state.currentHospitalKey] || hospitalsData['apex'];
+        }
+
+        function getTranslation(key) {
+            const langDict = i18n[state.currentLang] || i18n['en'];
+            return langDict[key] || i18n['en'][key] || key;
+        }
+
+        window.onload = function() {
+            document.getElementById('onboardingGateway').classList.remove('hidden');
+            rebuildHospitalDropdownsAndCards();
+            updateDemoCredHelper();
+            populateDropdowns();
+            renderApp();
+        };
+
+        // REBUILD HOSPITAL SELECTION OPTIONS ACROSS ALL MODALS AND HEADERS
+        function rebuildHospitalDropdownsAndCards() {
+            const keys = Object.keys(hospitalsData);
+            
+            const loginSelect = document.getElementById('loginHospitalSelect');
+            const headerSelect = document.getElementById('headerHospitalSwitcher');
+            const mobileSelect = document.getElementById('mobileHospitalSwitcher');
+
+            loginSelect.innerHTML = '';
+            headerSelect.innerHTML = '';
+            mobileSelect.innerHTML = '';
+
+            const patientGrid = document.getElementById('patientHospitalCardsGrid');
+            patientGrid.innerHTML = '';
+
+            keys.forEach(k => {
+                const hosp = hospitalsData[k];
+                const hospName = hosp.name[state.currentLang] || hosp.name['en'];
+
+                // Calculate current beds & doctors for patient cards
+                let totBeds = 0;
+                let occBeds = 0;
+                hosp.wards.forEach(w => { totBeds += w.total; occBeds += w.occupied; });
+                const freeBeds = Math.max(0, totBeds - occBeds);
+
+                const totDocs = hosp.doctors.length;
+                const unavailDocs = hosp.doctors.filter(d => ['In Surgery', 'On Break', 'Off Duty'].includes(d.status)).length;
+                const availDocs = totDocs - unavailDocs;
+
+                // Dropdown Options
+                loginSelect.add(new Option(`🏥 ${hospName}`, k));
+                headerSelect.add(new Option(`🏥 ${hospName}`, k));
+                mobileSelect.add(new Option(hospName, k));
+
+                // Patient Selection Cards
+                const card = document.createElement('button');
+                card.onclick = () => chooseHospitalForPatient(k);
+                card.className = "p-3.5 rounded-2xl border border-slate-200 hover:border-hospital-500 hover:bg-hospital-50/60 transition-all text-left bg-slate-50/50 flex flex-col justify-between space-y-2 group";
+                card.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-hospital-600 text-white flex items-center justify-center text-xs font-bold font-display shrink-0">
+                            ${hosp.prefix}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-hospital-700 font-display">${hospName}</h4>
+                            <p class="text-[10px] text-slate-500">${hosp.emergency}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-slate-200/60">
+                        <div><span class="text-slate-400 block text-[9px] uppercase font-bold">Free Beds</span><span class="font-bold text-emerald-700">${freeBeds} / ${totBeds}</span></div>
+                        <div><span class="text-slate-400 block text-[9px] uppercase font-bold">Active Doctors</span><span class="font-bold text-hospital-700">${availDocs} / ${totDocs}</span></div>
+                    </div>
+                `;
+                patientGrid.appendChild(card);
+            });
+
+            headerSelect.value = state.currentHospitalKey;
+            mobileSelect.value = state.currentHospitalKey;
+        }
+
+        function updateDemoCredHelper() {
+            const hospKey = document.getElementById('loginHospitalSelect').value;
+            const hosp = hospitalsData[hospKey];
+            if (hosp) {
+                document.getElementById('demoCredDetails').innerHTML = `
+                    Username: <span class="font-bold text-slate-900 font-mono">${hosp.username}</span> &bull; 
+                    Password: <span class="font-bold text-slate-900 font-mono">${hosp.password}</span>
+                `;
+                document.getElementById('loginUsername').value = hosp.username;
+                document.getElementById('loginPassword').value = hosp.password;
+            }
+        }
+
+        // GATEWAY STEP NAVIGATION
+        function goToGatewayStep(stepNum) {
+            document.getElementById('gatewayStep1').classList.add('hidden');
+            document.getElementById('gatewayStep2').classList.add('hidden');
+            document.getElementById('gatewayStep3Patient').classList.add('hidden');
+            document.getElementById('gatewayStep3Admin').classList.add('hidden');
+            document.getElementById('gatewayStep3Register').classList.add('hidden');
+
+            if (stepNum === 1) document.getElementById('gatewayStep1').classList.remove('hidden');
+            else if (stepNum === 2) document.getElementById('gatewayStep2').classList.remove('hidden');
+
+            document.getElementById('dotStep1').className = stepNum >= 1 ? 'w-8 h-2.5 rounded-full bg-hospital-600 transition-all' : 'w-2.5 h-2.5 rounded-full bg-slate-200 transition-all';
+            document.getElementById('dotStep2').className = stepNum >= 2 ? 'w-8 h-2.5 rounded-full bg-hospital-600 transition-all' : 'w-2.5 h-2.5 rounded-full bg-slate-200 transition-all';
+            document.getElementById('dotStep3').className = stepNum >= 3 ? 'w-8 h-2.5 rounded-full bg-hospital-600 transition-all' : 'w-2.5 h-2.5 rounded-full bg-slate-200 transition-all';
+        }
+
+        function setGatewayLanguage(lang) {
+            state.currentLang = lang;
+            document.getElementById('globalLangSelect').value = lang;
+            let label = "English";
+            if (lang === 'hi') label = "हिंदी (Hindi)";
+            if (lang === 'mr') label = "मराठी (Marathi)";
+            document.getElementById('currentSelectedLangBadge').innerText = label;
+            rebuildHospitalDropdownsAndCards();
+            applyLanguageUI();
+            goToGatewayStep(2);
+        }
+
+        function selectRolePatient() {
+            state.currentUserRole = 'patient';
+            goToGatewayStep(3);
+            document.getElementById('gatewayStep3Patient').classList.remove('hidden');
+        }
+
+        function selectRoleHospital() {
+            goToGatewayStep(3);
+            document.getElementById('gatewayStep3Admin').classList.remove('hidden');
+        }
+
+        function selectRoleRegisterHospital() {
+            goToGatewayStep(3);
+            document.getElementById('gatewayStep3Register').classList.remove('hidden');
+        }
+
+        function chooseHospitalForPatient(hospKey) {
+            state.currentHospitalKey = hospKey;
+            state.currentUserRole = 'patient';
+            state.isAdminLoggedIn = false;
+
+            document.getElementById('headerHospitalSwitcher').value = hospKey;
+            document.getElementById('mobileHospitalSwitcher').value = hospKey;
+
+            document.getElementById('onboardingGateway').classList.add('hidden');
+            switchView('public');
+
+            const currentHosp = getActiveHospitalData();
+            const hospName = currentHosp.name[state.currentLang] || currentHosp.name['en'];
+            showToast(`Connected to ${hospName}`, "Viewing real-time OPD queues & bed availability.", 'success');
+        }
+
+        function handleHospitalLogin(e) {
+            e.preventDefault();
+            const hospKey = document.getElementById('loginHospitalSelect').value;
+            const targetHosp = hospitalsData[hospKey];
+            const user = document.getElementById('loginUsername').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            const errEl = document.getElementById('loginErrorMsg');
+
+            if (targetHosp && user === targetHosp.username && pass === targetHosp.password) {
+                errEl.classList.add('hidden');
+                state.currentHospitalKey = hospKey;
+                state.currentUserRole = 'hospital';
+                state.isAdminLoggedIn = true;
+
+                document.getElementById('headerHospitalSwitcher').value = hospKey;
+                document.getElementById('mobileHospitalSwitcher').value = hospKey;
+
+                document.getElementById('onboardingGateway').classList.add('hidden');
+                applyLanguageUI();
+                switchView('admin');
+
+                const hospName = targetHosp.name[state.currentLang] || targetHosp.name['en'];
+                showToast(`Authenticated as ${hospName} Staff`, getTranslation('loginSuccessMsg'), 'success');
+            } else {
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        // REGISTER NEW HOSPITAL DYNAMICALLY
+        function handleRegisterHospital(e) {
+            e.preventDefault();
+            const name = document.getElementById('regHospName').value.trim();
+            const prefix = document.getElementById('regHospPrefix').value.trim().toUpperCase();
+            const hotline = document.getElementById('regHospHotline').value.trim();
+            const user = document.getElementById('regAdminUser').value.trim();
+            const pass = document.getElementById('regAdminPass').value.trim();
+
+            const key = prefix.toLowerCase() + '_' + Date.now();
+
+            hospitalsData[key] = {
+                id: key,
+                prefix: prefix,
+                username: user,
+                password: pass,
+                emergency: hotline,
+                name: { en: name, hi: name, mr: name },
+                sub: {
+                    en: "Live Crowd Control & Emergency Care Portal",
+                    hi: "लाइव भीड़ नियंत्रण एवं आपातकालीन देखभाल पोर्टल",
+                    mr: "थेट गर्दी नियंत्रण आणि आपत्कालीन काळजी पोर्टल"
+                },
+                broadcastNotice: `Welcome to ${name}. Live registrations and bed occupancy active.`,
+                wards: [
+                    { id: 'gen', nameKey: 'wardGen', total: 100, occupied: 65, waitMins: 15, icon: 'fa-bed-pulse' },
+                    { id: 'icu', nameKey: 'wardIcu', total: 25, occupied: 18, waitMins: 5, icon: 'fa-heart-pulse' },
+                    { id: 'mat', nameKey: 'wardMat', total: 30, occupied: 15, waitMins: 10, icon: 'fa-baby' },
+                    { id: 'ped', nameKey: 'wardPed', total: 35, occupied: 22, waitMins: 12, icon: 'fa-child-reaching' },
+                    { id: 'ort', nameKey: 'wardOrt', total: 30, occupied: 18, waitMins: 8, icon: 'fa-bone' },
+                    { id: 'iso', nameKey: 'wardIso', total: 20, occupied: 12, waitMins: 15, icon: 'fa-mask-face' }
+                ],
+                doctors: generateDoctorsWithDistribution(18, 11, 3, 2, 2, 500),
+                nearbyHospitals: [
+                    { id: 'h1', name: 'Apex Regional Medical Center', distance: '3.0 km', time: '10 mins driving', icuAvail: '3 beds free', genAvail: '18 beds free', phone: '+91 (800) 555-APEX' }
+                ]
+            };
+
+            state.currentHospitalKey = key;
+            state.currentUserRole = 'hospital';
+            state.isAdminLoggedIn = true;
+
+            rebuildHospitalDropdownsAndCards();
+            document.getElementById('headerHospitalSwitcher').value = key;
+            document.getElementById('mobileHospitalSwitcher').value = key;
+
+            document.getElementById('onboardingGateway').classList.add('hidden');
+            applyLanguageUI();
+            switchView('admin');
+
+            showToast(`${name} Registered!`, "Facility initialized with 6 wards & 18 doctors.", 'success');
+        }
+
+        function switchHospitalFromHeader(hospKey) {
+            state.currentHospitalKey = hospKey;
+            document.getElementById('headerHospitalSwitcher').value = hospKey;
+            document.getElementById('mobileHospitalSwitcher').value = hospKey;
+
+            applyLanguageUI();
+            renderApp();
+
+            const currentHosp = getActiveHospitalData();
+            const hospName = currentHosp.name[state.currentLang] || currentHosp.name['en'];
+            showToast("Facility Switched", `Now displaying data for ${hospName}`, "info");
+        }
+
+        function promptHospitalLogin() {
+            goToGatewayStep(3);
+            document.getElementById('gatewayStep3Admin').classList.remove('hidden');
+            document.getElementById('onboardingGateway').classList.remove('hidden');
+        }
+
+        function logoutHospitalAdmin() {
+            state.isAdminLoggedIn = false;
+            state.currentUserRole = 'patient';
+            switchView('public');
+            showToast("Logged Out", "Switched to Visitor / Patient View", "info");
+        }
+
+        function changeLanguageFromHeader(lang) {
+            state.currentLang = lang;
+            rebuildHospitalDropdownsAndCards();
+            applyLanguageUI();
+            renderApp();
+            showToast("Language Updated", `Switched to ${lang.toUpperCase()}`, "info");
+        }
+
+        function applyLanguageUI() {
+            const currentHosp = getActiveHospitalData();
+            const localizedName = currentHosp.name[state.currentLang] || currentHosp.name['en'];
+            const localizedSub = currentHosp.sub[state.currentLang] || currentHosp.sub['en'];
+
+            document.getElementById('headerHospitalTitle').innerText = localizedName;
+            document.getElementById('headerHospitalSub').innerText = localizedSub;
+            document.getElementById('headerLogoBadge').innerText = currentHosp.prefix;
+            document.getElementById('footerHospitalName').innerText = localizedName;
+            document.getElementById('footerEmergencyHotline').innerText = currentHosp.emergency;
+            document.getElementById('broadcastText').innerText = currentHosp.broadcastNotice;
+
+            document.getElementById('statLabelBeds').innerText = getTranslation('statBeds');
+            document.getElementById('statLabelDocs').innerText = getTranslation('statDocs');
+            document.getElementById('statLabelWait').innerText = getTranslation('statWait');
+            document.getElementById('statLabelSurge').innerText = getTranslation('statSurge');
+
+            document.getElementById('secWardsTitle').innerHTML = `<i class="fa-solid fa-hospital-bay text-hospital-600"></i> ${getTranslation('secWards')}`;
+            document.getElementById('secWardsSub').innerText = getTranslation('secWardsSub');
+
+            document.getElementById('secDocsTitle').innerHTML = `<i class="fa-solid fa-stethoscope text-hospital-600"></i> ${getTranslation('secDocs')}`;
+            document.getElementById('secDocsSub').innerText = getTranslation('secDocsSub');
+
+            document.getElementById('passGenTitle').innerHTML = `<i class="fa-solid fa-ticket text-amber-400"></i> ${getTranslation('passGenTitle')}`;
+            document.getElementById('noLoginTag').innerText = getTranslation('noLoginTag');
+            document.getElementById('passGenSub').innerText = getTranslation('passGenSub');
+
+            document.getElementById('lblPatientName').innerText = getTranslation('lblPatientName');
+            document.getElementById('lblTargetWard').innerText = getTranslation('lblTargetWard');
+            document.getElementById('lblDoctor').innerText = getTranslation('lblDoctor');
+            document.getElementById('lblMobile').innerText = getTranslation('lblMobile');
+            document.getElementById('btnGeneratePass').innerText = getTranslation('btnGeneratePass');
+
+            document.getElementById('nearbyTitle').innerHTML = `<i class="fa-solid fa-route text-hospital-600"></i> ${getTranslation('nearbyTitle')}`;
+            document.getElementById('nearbySub').innerText = getTranslation('nearbySub');
+
+            populateDropdowns();
+            renderRoleBadgeHeader();
+            renderApp();
+        }
+
+        function populateDropdowns() {
+            const currentHosp = getActiveHospitalData();
+            const wardSelect = document.getElementById('passWardSelect');
+            const docFilterSelect = document.getElementById('doctorDeptFilter');
+            if (!wardSelect || !docFilterSelect) return;
+            
+            wardSelect.innerHTML = '';
+            docFilterSelect.innerHTML = '<option value="All">All Wards / Specialties</option>';
+
+            currentHosp.wards.forEach(w => {
+                const name = getTranslation(w.nameKey);
+                wardSelect.add(new Option(name, w.nameKey));
+                docFilterSelect.add(new Option(name, w.nameKey));
+            });
+
+            updatePassDoctorOptions();
+        }
+
+        function renderRoleBadgeHeader() {
+            const container = document.getElementById('userRoleBadgeContainer');
+            container.innerHTML = '';
+            const currentHosp = getActiveHospitalData();
+
+            if (state.isAdminLoggedIn) {
+                container.innerHTML = `
+                    <div class="hidden md:flex items-center gap-2 bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold font-display">
+                        <i class="fa-solid fa-user-shield text-emerald-400"></i>
+                        <span>Admin (${currentHosp.prefix})</span>
+                    </div>
+                    <div class="bg-slate-100 p-1 rounded-xl border border-slate-200 flex text-xs font-semibold">
+                        <button onclick="switchView('public')" class="px-2.5 py-1 rounded-lg transition-all ${state.activeView === 'public' ? 'text-hospital-700 bg-white shadow-xs font-bold' : 'text-slate-600'}">Visitor</button>
+                        <button onclick="switchView('admin')" class="px-2.5 py-1 rounded-lg transition-all ${state.activeView === 'admin' ? 'text-hospital-700 bg-white shadow-xs font-bold' : 'text-slate-600'}">Admin</button>
+                    </div>
+                    <button onclick="logoutHospitalAdmin()" class="text-xs text-rose-600 hover:text-rose-800 font-bold px-2 py-1" title="Logout Admin">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="hidden md:flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-xl text-xs font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>Patient Mode</span>
+                    </div>
+                    <button onclick="promptHospitalLogin()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 font-display">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>Staff Login</span>
+                    </button>
+                `;
+            }
+        }
+
+        function switchView(targetView) {
+            if (targetView === 'admin' && !state.isAdminLoggedIn) {
+                promptHospitalLogin();
+                return;
+            }
+
+            state.activeView = targetView;
+            if (targetView === 'public') {
+                document.getElementById('publicView').classList.remove('hidden');
+                document.getElementById('adminView').classList.add('hidden');
+            } else {
+                document.getElementById('publicView').classList.add('hidden');
+                document.getElementById('adminView').classList.remove('hidden');
+            }
+            renderRoleBadgeHeader();
+            renderApp();
+        }
+
+        function getWardStats(ward) {
+            const pct = Math.round((ward.occupied / ward.total) * 100);
+            let statusLabel = 'Available';
+            let badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+            let barClass = 'bg-emerald-500';
+
+            if (pct >= 90) {
+                statusLabel = 'Critical / Full';
+                badgeClass = 'bg-rose-100 text-rose-800 border-rose-200';
+                barClass = 'bg-rose-500';
+            } else if (pct >= 75) {
+                statusLabel = 'High Occupancy';
+                badgeClass = 'bg-amber-100 text-amber-800 border-amber-200';
+                barClass = 'bg-amber-500';
+            }
+
+            return { pct, statusLabel, badgeClass, barClass, open: Math.max(0, ward.total - ward.occupied) };
+        }
+
+        function renderApp() {
+            renderHeaderMetrics();
+            renderWards();
+            renderDoctors();
+            renderNearbyHospitals();
+            renderAdminTables();
+        }
+
+        function renderHeaderMetrics() {
+            const currentHosp = getActiveHospitalData();
+            let totalBeds = 0;
+            let totalOccupied = 0;
+            let highCapCount = 0;
+
+            currentHosp.wards.forEach(w => {
+                totalBeds += w.total;
+                totalOccupied += w.occupied;
+                const pct = Math.round((w.occupied / w.total) * 100);
+                if (pct >= 85) highCapCount++;
+            });
+
+            const availBeds = Math.max(0, totalBeds - totalOccupied);
+            document.getElementById('statOpenBeds').innerText = `${availBeds} Beds`;
+
+            // Dynamic Doctor Availability Calculation: Total - (In Surgery + On Break + Off Duty)
+            const totalDocsCount = currentHosp.doctors.length;
+            const unavailableDocs = currentHosp.doctors.filter(d => ['In Surgery', 'On Break', 'Off Duty'].includes(d.status)).length;
+            const availableDocsCount = totalDocsCount - unavailableDocs;
+
+            const availWord = state.currentLang === 'hi' ? 'उपलब्ध' : state.currentLang === 'mr' ? 'उपलब्ध' : 'Available';
+            document.getElementById('statActiveDocs').innerText = `${availableDocsCount} / ${totalDocsCount} ${availWord}`;
+            document.getElementById('statAlertWards').innerText = `${highCapCount} Wards`;
+
+            const warningTrigger = document.getElementById('capacityWarningTrigger');
+            if (highCapCount > 0) {
+                warningTrigger.classList.remove('hidden');
+                warningTrigger.classList.add('flex');
+            } else {
+                warningTrigger.classList.add('hidden');
+                warningTrigger.classList.remove('flex');
+            }
+        }
+
+        function renderWards() {
+            const currentHosp = getActiveHospitalData();
+            const grid = document.getElementById('wardsGrid');
+            grid.innerHTML = '';
+
+            currentHosp.wards.forEach(ward => {
+                const { pct, statusLabel, badgeClass, barClass, open } = getWardStats(ward);
+                const wardName = getTranslation(ward.nameKey);
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-10 h-10 rounded-xl bg-hospital-50 text-hospital-600 flex items-center justify-center font-bold text-lg shrink-0">
+                                    <i class="fa-solid ${ward.icon}"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-sm font-display">${wardName}</h3>
+                                    <span class="text-[11px] text-slate-500 font-medium">Wait Est: ~${ward.waitMins} mins</span>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${badgeClass}">
+                                ${statusLabel}
+                            </span>
+                        </div>
+
+                        <div class="space-y-1.5 mt-3">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <span class="text-slate-500">Occupancy Level</span>
+                                <span class="text-slate-800">${pct}%</span>
+                            </div>
+                            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div class="h-full ${barClass} transition-all duration-300" style="width: ${pct}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <div>
+                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Occupied / Total</span>
+                            <span class="font-bold text-slate-700">${ward.occupied} / ${ward.total} Beds</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Beds Available</span>
+                            <span class="font-bold text-emerald-600">${open} Open</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderDoctors() {
+            const currentHosp = getActiveHospitalData();
+            const grid = document.getElementById('doctorsGrid');
+            grid.innerHTML = '';
+
+            const searchTerm = (document.getElementById('doctorSearch')?.value || '').toLowerCase();
+            const deptFilter = document.getElementById('doctorDeptFilter')?.value || 'All';
+            const statusFilter = document.getElementById('doctorStatusFilter')?.value || 'All';
+
+            const filtered = currentHosp.doctors.filter(doc => {
+                const matchesSearch = doc.name.toLowerCase().includes(searchTerm);
+                const matchesDept = deptFilter === 'All' || doc.deptKey === deptFilter;
+                const matchesStatus = statusFilter === 'All' || doc.status === statusFilter;
+                return matchesSearch && matchesDept && matchesStatus;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 text-xs">
+                        <i class="fa-solid fa-user-slash text-2xl mb-2 text-slate-300 block"></i>
+                        No doctors match current filters.
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(doc => {
+                let statusBadge = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                if (doc.status === 'In Surgery') statusBadge = 'bg-rose-100 text-rose-800 border-rose-200';
+                else if (doc.status === 'In Consultation') statusBadge = 'bg-blue-100 text-blue-800 border-blue-200';
+                else if (doc.status === 'On Break') statusBadge = 'bg-amber-100 text-amber-800 border-amber-200';
+                else if (doc.status === 'Off Duty') statusBadge = 'bg-slate-100 text-slate-600 border-slate-200';
+
+                const deptName = getTranslation(doc.deptKey);
+                const totalWaitTime = doc.totalWaiting * 12;
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 group";
+                
+                const deleteBtnHtml = state.isAdminLoggedIn ? `
+                    <button onclick="removeDoctor(${doc.id})" class="text-slate-300 hover:text-rose-600 transition-colors p-1" title="Remove Doctor">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                ` : '';
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-sm font-display">${doc.name}</h3>
+                                <p class="text-xs text-hospital-600 font-semibold">${deptName}</p>
+                                <p class="text-[11px] text-slate-400"><i class="fa-solid fa-door-open mr-1"></i>${doc.room}</p>
+                            </div>
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${statusBadge}">
+                                    ${doc.status}
+                                </span>
+                                ${deleteBtnHtml}
+                            </div>
+                        </div>
+
+                        <div class="mt-4 bg-slate-50 rounded-xl p-3 border border-slate-200/80 grid grid-cols-3 gap-2 text-center">
+                            <div>
+                                <span class="text-[10px] text-slate-400 block uppercase font-bold">Serving</span>
+                                <span class="text-base font-black text-slate-800 font-display">#${doc.currentToken || '--'}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400 block uppercase font-bold">Waiting</span>
+                                <span class="text-base font-black text-hospital-600 font-display">${doc.totalWaiting}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400 block uppercase font-bold">Est Wait</span>
+                                <span class="text-xs font-bold text-amber-600 mt-1 block font-display">~${totalWaitTime}m</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="openPassForDoctor('${doc.name}', '${doc.deptKey}')" class="w-full py-2 bg-slate-100 hover:bg-hospital-50 text-hospital-700 font-semibold rounded-xl text-xs transition-all border border-slate-200 flex items-center justify-center gap-1.5 font-display">
+                        <i class="fa-solid fa-ticket"></i> Get Queue Pass
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderNearbyHospitals() {
+            const currentHosp = getActiveHospitalData();
+            const grid = document.getElementById('nearbyHospitalsGrid');
+            grid.innerHTML = '';
+
+            currentHosp.nearbyHospitals.forEach(hosp => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col justify-between space-y-3";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-slate-900 text-sm font-display">${hosp.name}</h4>
+                            <span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded">${hosp.distance}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3"><i class="fa-solid fa-car mr-1 text-slate-400"></i>${hosp.time}</p>
+
+                        <div class="space-y-1 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">ICU Free:</span>
+                                <span class="font-bold text-emerald-700">${hosp.icuAvail}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">General Ward:</span>
+                                <span class="font-bold text-emerald-700">${hosp.genAvail}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="openHospitalModal('${hosp.id}')" class="w-full py-2 bg-white hover:bg-slate-100 text-slate-800 font-semibold rounded-xl text-xs border border-slate-300 transition-all flex items-center justify-center gap-1 font-display">
+                        <i class="fa-solid fa-location-arrow text-hospital-600"></i> Directions &amp; Hotline
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderAdminTables() {
+            const currentHosp = getActiveHospitalData();
+            
+            // Wards Table
+            const wardTable = document.getElementById('adminWardsTable');
+            wardTable.innerHTML = '';
+
+            currentHosp.wards.forEach(w => {
+                const { pct, statusLabel, badgeClass, open } = getWardStats(w);
+                const name = getTranslation(w.nameKey);
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-slate-900 font-display">${name}</td>
+                    <td class="py-3 px-4">${w.total} Beds</td>
+                    <td class="py-3 px-4"><span class="font-bold text-slate-900">${w.occupied}</span></td>
+                    <td class="py-3 px-4 text-emerald-700 font-bold">${open}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">${pct}% (${statusLabel})</span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="inline-flex items-center gap-1">
+                            <button onclick="adjustBedCount('${w.id}', -1)" class="w-7 h-7 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg font-bold text-slate-700 transition-all text-xs">-</button>
+                            <button onclick="adjustBedCount('${w.id}', 1)" class="w-7 h-7 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg font-bold text-slate-700 transition-all text-xs">+</button>
+                            <button onclick="adjustBedCount('${w.id}', 5)" class="px-2 py-1 bg-hospital-50 hover:bg-hospital-100 text-hospital-700 border border-hospital-200 rounded-lg font-bold text-[10px] transition-all">+5 Beds</button>
+                        </div>
+                    </td>
+                `;
+                wardTable.appendChild(tr);
+            });
+
+            // Doctors Roster Table
+            const docTable = document.getElementById('adminDoctorsTable');
+            docTable.innerHTML = '';
+
+            currentHosp.doctors.forEach(doc => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-slate-900 font-display">${doc.name}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600">${getTranslation(doc.deptKey)}</td>
+                    <td class="py-3 px-4 text-xs font-mono text-slate-500">${doc.room}</td>
+                    <td class="py-3 px-4">
+                        <select onchange="updateDoctorStatus(${doc.id}, this.value)" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-semibold focus:ring-2 focus:ring-hospital-500">
+                            <option value="Available" ${doc.status === 'Available' ? 'selected' : ''}>Available</option>
+                            <option value="In Consultation" ${doc.status === 'In Consultation' ? 'selected' : ''}>In Consultation</option>
+                            <option value="In Surgery" ${doc.status === 'In Surgery' ? 'selected' : ''}>In Surgery</option>
+                            <option value="On Break" ${doc.status === 'On Break' ? 'selected' : ''}>On Break</option>
+                            <option value="Off Duty" ${doc.status === 'Off Duty' ? 'selected' : ''}>Off Duty</option>
+                        </select>
+                    </td>
+                    <td class="py-3 px-4 font-black text-slate-800 font-display">#${doc.currentToken}</td>
+                    <td class="py-3 px-4 font-bold text-hospital-600 font-display">${doc.totalWaiting} waiting</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="inline-flex items-center gap-2">
+                            <button onclick="advanceDoctorToken(${doc.id})" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs transition-all font-display">
+                                <i class="fa-solid fa-forward mr-1"></i> Next Token
+                            </button>
+                            <button onclick="removeDoctor(${doc.id})" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg border border-rose-200 transition-all" title="Remove Doctor">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                docTable.appendChild(tr);
+            });
+        }
+
+        function openAddDoctorModal() {
+            const currentHosp = getActiveHospitalData();
+            const nextNum = currentHosp.doctors.length + 1;
+            document.getElementById('newDocName').value = `Doctor-${nextNum}`;
+            openModal('addDoctorModal');
+        }
+
+        function handleAddDoctorSubmit(e) {
+            e.preventDefault();
+            const currentHosp = getActiveHospitalData();
+            const name = document.getElementById('newDocName').value.trim();
+            const deptKey = document.getElementById('newDocDept').value;
+            const room = document.getElementById('newDocRoom').value.trim();
+            const status = document.getElementById('newDocStatus').value;
+            const token = parseInt(document.getElementById('newDocToken').value) || 1;
+
+            currentHosp.doctors.push({
+                id: Date.now(),
+                name: name,
+                deptKey: deptKey,
+                status: status,
+                currentToken: token,
+                totalWaiting: 0,
+                room: room
+            });
+
+            closeModal('addDoctorModal');
+            updatePassDoctorOptions();
+            renderApp();
+            showToast("Doctor Registered", `${name} added to ${currentHosp.prefix} roster`, "success");
+        }
+
+        function removeDoctor(docId) {
+            const currentHosp = getActiveHospitalData();
+            const idx = currentHosp.doctors.findIndex(d => d.id === docId);
+            if (idx !== -1) {
+                const name = currentHosp.doctors[idx].name;
+                currentHosp.doctors.splice(idx, 1);
+                updatePassDoctorOptions();
+                renderApp();
+                showToast("Doctor Removed", `${name} removed from active roster`, "info");
+            }
+        }
+
+        function adjustBedCount(wardId, delta) {
+            const currentHosp = getActiveHospitalData();
+            const ward = currentHosp.wards.find(w => w.id === wardId);
+            if (ward) {
+                ward.occupied = Math.max(0, Math.min(ward.total, ward.occupied + delta));
+                renderApp();
+            }
+        }
+
+        function updateDoctorStatus(docId, newStatus) {
+            const currentHosp = getActiveHospitalData();
+            const doc = currentHosp.doctors.find(d => d.id === docId);
+            if (doc) {
+                doc.status = newStatus;
+                renderApp();
+            }
+        }
+
+        function advanceDoctorToken(docId) {
+            const currentHosp = getActiveHospitalData();
+            const doc = currentHosp.doctors.find(d => d.id === docId);
+            if (doc) {
+                doc.currentToken++;
+                if (doc.totalWaiting > 0) doc.totalWaiting--;
+                renderApp();
+            }
+        }
+
+        function updateBroadcastText() {
+            const currentHosp = getActiveHospitalData();
+            const input = document.getElementById('adminBroadcastInput');
+            if (input.value.trim() !== '') {
+                currentHosp.broadcastNotice = input.value.trim();
+                document.getElementById('broadcastText').innerText = currentHosp.broadcastNotice;
+                document.getElementById('broadcastBanner').classList.remove('hidden');
+                showToast("Broadcast Published", "Banner text updated", "success");
+            }
+        }
+
+        function closeBroadcastBanner() {
+            document.getElementById('broadcastBanner').classList.add('hidden');
+        }
+
+        function updatePassDoctorOptions() {
+            const currentHosp = getActiveHospitalData();
+            const wardVal = document.getElementById('passWardSelect').value;
+            const docSelect = document.getElementById('passDoctorSelect');
+            if (!docSelect) return;
+            docSelect.innerHTML = '';
+
+            const matches = currentHosp.doctors.filter(d => d.deptKey === wardVal);
+            if (matches.length === 0) {
+                docSelect.add(new Option("Duty Medical Officer", "Duty Medical Officer"));
+            } else {
+                matches.forEach(d => {
+                    docSelect.add(new Option(`${d.name} (${d.status})`, d.name));
+                });
+            }
+        }
+
+        function openPassForDoctor(docName, deptKey) {
+            document.getElementById('passWardSelect').value = deptKey;
+            updatePassDoctorOptions();
+            document.getElementById('passDoctorSelect').value = docName;
+            document.getElementById('passForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function generateQueuePass(e) {
+            e.preventDefault();
+            const currentHosp = getActiveHospitalData();
+            const name = document.getElementById('passPatientName').value;
+            const wardKey = document.getElementById('passWardSelect').value;
+            const doctor = document.getElementById('passDoctorSelect').value;
+            const phone = document.getElementById('passPhone').value;
+
+            const randomNum = Math.floor(100 + Math.random() * 900);
+            const formattedToken = `${currentHosp.prefix}-${randomNum}`;
+            const targetDoc = currentHosp.doctors.find(d => d.name === doctor);
+            if (targetDoc) {
+                targetDoc.totalWaiting++;
+                renderApp();
+            }
+
+            const localizedHospName = currentHosp.name[state.currentLang] || currentHosp.name['en'];
+
+            document.getElementById('ticketTokenNum').innerText = formattedToken;
+            document.getElementById('ticketHospName').innerText = localizedHospName;
+            document.getElementById('ticketDept').innerText = getTranslation(wardKey);
+            document.getElementById('ticketPatient').innerText = name;
+            document.getElementById('ticketDoctor').innerText = doctor;
+            document.getElementById('ticketPhone').innerText = phone;
+            document.getElementById('ticketRoom').innerText = targetDoc ? targetDoc.room : 'OPD Room 101';
+
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 20);
+            document.getElementById('ticketEstTime').innerText = `~${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+            openModal('tokenModal');
+            showToast("Pass Issued", `Token ${formattedToken} generated!`, "success");
+        }
+
+        function copyTokenDetails() {
+            const token = document.getElementById('ticketTokenNum').innerText;
+            const doc = document.getElementById('ticketDoctor').innerText;
+            const currentHosp = getActiveHospitalData();
+            const localizedHospName = currentHosp.name[state.currentLang] || currentHosp.name['en'];
+            const text = `${localizedHospName} OPD Token: ${token} | Doctor: ${doc}`;
+
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast("Copied", "Ticket details copied to clipboard", "info");
+        }
+
+        function openHospitalModal(hospId) {
+            const currentHosp = getActiveHospitalData();
+            const hosp = currentHosp.nearbyHospitals.find(h => h.id === hospId);
+            if (!hosp) return;
+
+            document.getElementById('modalHospName').innerText = hosp.name;
+            document.getElementById('modalHospDist').innerText = `${hosp.distance} away • Approx ${hosp.time}`;
+            document.getElementById('modalHospIcu').innerText = hosp.icuAvail;
+            document.getElementById('modalHospGen').innerText = hosp.genAvail;
+            document.getElementById('modalHospPhone').value = hosp.phone;
+
+            openModal('hospitalModal');
+        }
+
+        function resetAllData() {
+            const currentHosp = getActiveHospitalData();
+            currentHosp.wards.forEach(w => w.occupied = Math.floor(w.total * 0.7));
+            renderApp();
+            showToast("Reset Baseline", `Restored default bed state for ${currentHosp.prefix}`, "info");
+        }
+
+        function filterDoctors() {
+            renderDoctors();
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let borderClass = 'border-hospital-500 bg-slate-900 text-white';
+            let iconClass = 'fa-circle-info text-hospital-400';
+
+            if (type === 'success') {
+                borderClass = 'border-emerald-500 bg-slate-900 text-white';
+                iconClass = 'fa-circle-check text-emerald-400';
+            }
+
+            toast.className = `pointer-events-auto p-4 rounded-2xl shadow-xl border-l-4 ${borderClass} flex items-start gap-3 min-w-[280px] max-w-sm transition-all duration-300 transform translate-y-2 opacity-0`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-lg mt-0.5"></i>
+                <div class="flex-1">
+                    <div class="font-bold text-xs font-display">${title}</div>
+                    <div class="text-[11px] text-slate-300 mt-0.5">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
